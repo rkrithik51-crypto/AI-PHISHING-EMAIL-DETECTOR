@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phishing Detector — Handshake AI Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface2: #1a1a26;
+      --border: rgba(255,255,255,0.07);
+      --border-hover: rgba(255,255,255,0.14);
+      --text: #f0eff8;
+      --muted: #8884a8;
+      --accent: #7c6af7;
+      --accent-soft: rgba(124,106,247,0.12);
+      --accent-glow: rgba(124,106,247,0.3);
+      --danger: #f05656;
+      --danger-soft: rgba(240,86,86,0.1);
+      --warn: #f0a056;
+      --warn-soft: rgba(240,160,86,0.1);
+      --ok: #4ecb8d;
+      --ok-soft: rgba(78,203,141,0.1);
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,106,247,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,106,247,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* glow orb */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(124,106,247,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* NAV */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 0 0;
+      margin-bottom: 72px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .nav-logo {
+      width: 30px;
+      height: 30px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #fff;
+    }
+
+    .nav-badge {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid rgba(124,106,247,0.2);
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.04em;
+    }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid rgba(124,106,247,0.18);
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      letter-spacing: 0.05em;
+    }
+
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 6vw, 52px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, #a89cf7 0%, #7c6af7 50%, #5b8df7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 16px;
+      color: var(--muted);
+      font-weight: 300;
+      line-height: 1.7;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* CARD */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+
+    .card:focus-within {
+      border-color: var(--border-hover);
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title i { font-size: 14px; color: var(--accent); }
+
+    /* FORM */
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+    @media (max-width: 560px) { .row2 { grid-template-columns: 1fr; } }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+
+    label {
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    input, textarea {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      padding: 11px 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+
+    input::placeholder, textarea::placeholder { color: rgba(136,132,168,0.5); }
+
+    input:focus, textarea:focus {
+      border-color: rgba(124,106,247,0.4);
+      box-shadow: 0 0 0 3px rgba(124,106,247,0.08);
+    }
+
+    textarea { resize: vertical; min-height: 160px; line-height: 1.6; }
+
+    /* BUTTON */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 12px 28px;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .btn-primary:hover { background: #6a59e8; transform: translateY(-1px); box-shadow: 0 4px 24px var(--accent-glow); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* LOADER */
+    #loader {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 20px;
+      font-family: var(--font-mono);
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { display: inline-block; animation: spin 0.8s linear infinite; }
+
+    /* RESULT */
+    #result { display: none; margin-top: 20px; }
+
+    .verdict-card {
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 16px;
+      border: 1px solid;
+    }
+
+    .verdict-phishing { background: var(--danger-soft); border-color: rgba(240,86,86,0.2); }
+    .verdict-suspicious { background: var(--warn-soft); border-color: rgba(240,160,86,0.2); }
+    .verdict-legitimate { background: var(--ok-soft); border-color: rgba(78,203,141,0.2); }
+
+    .verdict-icon { font-size: 32px; flex-shrink: 0; margin-top: 2px; }
+    .verdict-phishing .verdict-icon { color: var(--danger); }
+    .verdict-suspicious .verdict-icon { color: var(--warn); }
+    .verdict-legitimate .verdict-icon { color: var(--ok); }
+
+    .verdict-label {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .verdict-phishing .verdict-label { color: var(--danger); }
+    .verdict-suspicious .verdict-label { color: var(--warn); }
+    .verdict-legitimate .verdict-label { color: var(--ok); }
+
+    .verdict-summary { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+
+    .metric {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      text-align: center;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px 20px;
+      margin-bottom: 12px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .item-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text);
+    }
+
+    .item-row i { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .item-row.flag i { color: var(--danger); }
+    .item-row.safe i { color: var(--ok); }
+    .item-row.tip i { color: var(--warn); }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      margin-top: 60px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    .error-box {
+      background: var(--danger-soft);
+      border: 1px solid rgba(240,86,86,0.2);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      font-size: 14px;
+      color: var(--danger);
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav>
+    <a class="nav-brand" href="#">
+      <div class="nav-logo"><i class="ti ti-handshake" aria-hidden="true"></i></div>
+      Handshake AI
+    </a>
+    <span class="nav-badge">showcase</span>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-tag">
+      <i class="ti ti-shield-bolt" aria-hidden="true"></i>
+      AI-powered security tool
+    </div>
+    <h1>Phishing<br /><span>Email Detector</span></h1>
+    <p>Paste any suspicious email and let AI analyze it for phishing patterns, red flags, and risk signals in seconds.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><i class="ti ti-mail" aria-hidden="true"></i> Email input</div>
+    <div class="row2">
+      <div class="field">
+        <label for="sender">Sender address</label>
+        <input type="text" id="sender" placeholder="e.g. support@paypa1-secure.com" />
+      </div>
+      <div class="field">
+        <label for="subject">Subject line</label>
+        <input type="text" id="subject" placeholder="e.g. Urgent: Verify your account!" />
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:20px;">
+      <label for="body">Email body</label>
+      <textarea id="body" placeholder="Paste the full email content here..."></textarea>
+    </div>
+    <button class="btn btn-primary" id="analyzeBtn" onclick="analyze()">
+      <i class="ti ti-shield-search" aria-hidden="true"></i>
+      Analyze email
+    </button>
+    <div id="loader">
+      <i class="ti ti-loader-2 spin" aria-hidden="true"></i>
+      Analyzing with AI...
+    </div>
+  </div>
+
+  <div id="result"></div>
+
+  <footer>
+    Built for <a href="#">Handshake AI Showcase</a> &mdash; powered by Claude &middot; <a href="https://github.com/" target="_blank">View on GitHub</a>
+  </footer>
+
+</div>
+
+<script>
+const VERDICT_MAP = {
+  PHISHING:   { cls: 'verdict-phishing',   icon: 'ti-shield-x',          label: 'Phishing detected' },
+  SUSPICIOUS: { cls: 'verdict-suspicious', icon: 'ti-shield-exclamation', label: 'Suspicious email' },
+  LEGITIMATE: { cls: 'verdict-legitimate', icon: 'ti-shield-check',       label: 'Looks legitimate' },
+};
+
+const RISK_COLOR = r => r >= 70 ? 'var(--danger)' : r >= 40 ? 'var(--warn)' : 'var(--ok)';
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function analyze() {
+  const sender = document.getElementById('sender').value.trim();
+  const subject = document.getElementById('subject').value.trim();
+  const body = document.getElementById('body').value.trim();
+
+  if (!body && !sender && !subject) {
+    showError('Please paste at least the email body to analyze.');
+    return;
+  }
+
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-shield-search" aria-hidden="true"></i> Analyzing...';
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('loader').style.display = 'flex';
+
+  const prompt = `You are a cybersecurity expert specializing in phishing email detection. Analyze the following email and determine whether it is a phishing attempt or a legitimate email.
+
+Sender: ${sender || '(not provided)'}
+Subject: ${subject || '(not provided)'}
+Body:
+${body || '(not provided)'}
+
+Respond ONLY with a valid JSON object, no markdown, no backticks, no preamble. Use this exact structure:
+{
+  "verdict": "PHISHING" | "LEGITIMATE" | "SUSPICIOUS",
+  "confidence": <number 0-100>,
+  "risk_score": <number 0-100>,
+  "summary": "<one sentence summary>",
+  "red_flags": ["<flag1>", "<flag2>"],
+  "safe_signals": ["<signal1>", "<signal2>"],
+  "tips": ["<tip1>", "<tip2>"]
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.map(i => i.text || '').join('');
+    const clean = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    showResult(parsed);
+  } catch(err) {
+    showError('Something went wrong. Make sure your API key is configured and try again.');
+  } finally {
+    document.getElementById('loader').style.display = 'none';
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-shield-search" aria-hidden="true"></i> Analyze email';
+  }
+}
+
+function showResult(d) {
+  const el = document.getElementById('result');
+  el.style.display = 'block';
+
+  const v = d.verdict || 'SUSPICIOUS';
+  const m = VERDICT_MAP[v] || VERDICT_MAP.SUSPICIOUS;
+  const conf = Math.round(d.confidence || 0);
+  const risk = Math.round(d.risk_score || 0);
+
+  const flags = (d.red_flags || []).map(f =>
+    `<div class="item-row flag"><i class="ti ti-circle-x" aria-hidden="true"></i><span>${esc(f)}</span></div>`
+  ).join('');
+
+  const safes = (d.safe_signals || []).map(s =>
+    `<div class="item-row safe"><i class="ti ti-circle-check" aria-hidden="true"></i><span>${esc(s)}</span></div>`
+  ).join('');
+
+  const tips = (d.tips || []).map(t =>
+    `<div class="item-row tip"><i class="ti ti-bulb" aria-hidden="true"></i><span>${esc(t)}</span></div>`
+  ).join('');
+
+  el.innerHTML = `
+    <div class="verdict-card ${m.cls}">
+      <i class="ti ${m.icon} verdict-icon" aria-hidden="true"></i>
+      <div>
+        <div class="verdict-label">${m.label}</div>
+        <div class="verdict-summary">${esc(d.summary || '')}</div>
+      </div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">AI confidence</div>
+        <div class="metric-value" style="color:var(--accent)">${conf}%</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Risk score</div>
+        <div class="metric-value" style="color:${RISK_COLOR(risk)}">${risk}/100</div>
+      </div>
+    </div>
+
+    ${flags ? `<div class="section-card"><div class="section-label">Red flags</div>${flags}</div>` : ''}
+    ${safes ? `<div class="section-card"><div class="section-label">Safe signals</div>${safes}</div>` : ''}
+    ${tips  ? `<div class="section-card"><div class="section-label">What to do</div>${tips}</div>`  : ''}
+  `;
+}
+
+function showError(msg) {
+  const el = document.getElementById('result');
+  el.style.display = 'block';
+  el.innerHTML = `<div class="error-box">${esc(msg)}</div>`;
+}
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') analyze();
+});
+</script>
+</body>
+</html>
